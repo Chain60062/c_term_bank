@@ -14,7 +14,7 @@ typedef struct
     // info da conta
     char Status[STATUS_MAX_LEN + 1];
     unsigned short AccountType; // 1 para corrente, 2 para poupanca
-    long AccountNumber;
+    int AccountNumber;
     double Balance;
 } Clients;
 
@@ -176,11 +176,11 @@ void list_clients(void)
 
     for (int i = 0; i < num_of_clients; i++)
     {
-        printf("Informacoes do cliente %d.\n", i + 1);
-        printf("Nome: %s.\n", clients[i].Name);
-        printf("Idade: %d.\n", clients[i].Age);
-        printf("CPF: %s.\n", clients[i].CPF);
-        printf("Numero da Conta %ld.\n", clients[i].AccountNumber);
+        printf("Informacoes do cliente %d:\n", i + 1);
+        printf("Nome: %s\n", clients[i].Name);
+        printf("Idade: %d\n", clients[i].Age);
+        printf("CPF: %s\n", clients[i].CPF);
+        printf("Numero da Conta %d\n", clients[i].AccountNumber);
 
         if (clients[i].AccountType == 1)
             printf("Tipo de Conta: Corrente.\n");
@@ -206,11 +206,11 @@ void deposit(void)
 // estrutura de funcao comum entre saque e deposito
 void account_operation(int operation_type)
 {
-    long account_number = 0;
+    int account_number = 0;
     double value = 0.0;
 
     printf("Digite o número da conta");
-    scanf("%ld", &account_number);
+    scanf("%d", &account_number);
     for (int i = 0; i < num_of_clients; i++)
     {
         if (account_number == clients[i].AccountNumber)
@@ -244,10 +244,9 @@ void account_operation(int operation_type)
     // caso contrario conta nao existe
     printf("Este numero de conta nao existe.");
 }
-
+//valida tamanho do cpf
 bool is_cpf_format_valid(int strlen)
 {
-    printf("TAMANHO: %d\n", strlen);
     return strlen == 14 ? true : false;
 }
 // funcao que verifica se usuario ja exist
@@ -265,23 +264,28 @@ int does_client_already_exist(char *cpf)
 void loan(void)
 {
 }
+
 void close_account(void)
 {
-    long account_number = 0;
+    int account_number = 0;
 
-    printf("Digite o numero da conta");
+    printf("Digite o numero da conta: ");
+    scanf(" %d", &account_number);
 
     for (int i = 0; i < num_of_clients; i++)
-    {
+    {       
         if (clients[i].AccountNumber == account_number)
         {
+            printf("contas batem\n");
             if (clients[i].Balance == 0.0)
             {
-                strcpy(clients[num_of_clients].Status, "FECHADA");
+                strcpy(clients[i].Status, "FECHADA");
+                printf("Conta fechada com sucesso.\n");
+                return;
             }
             else
             {
-                printf("e necessario esvaziar a conta antes de fecha-la");
+                printf("E necessario esvaziar a conta antes de fecha-la");
                 return;
             }
         }
