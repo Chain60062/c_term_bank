@@ -1,21 +1,18 @@
-#include <stdio.h>
 #include "banco.h"
-#include <string.h>
-#include <stdbool.h>
-#include <ctype.h>
-#define NAME_MAX_LEN 100 // tamanho max do nome
-#define MAX_CLIENTS 100  // max de clintes da aplicacao
-#define CPF_LEN 14
+#define NAME_MAX_LEN 100  // tamanho max do nome
+#define MAX_CLIENTS 100   // max de clintes da aplicacao
+#define STATUS_MAX_LEN 20 // tamanho maximo do status
+#define CPF_LEN 14        // tamanho do CPF
 
 // struct de clientes
 typedef struct
 {
     // info do cliente
-    char *CPF;
-    char *Name;
+    char CPF[CPF_LEN + 1];
+    char Name[MAX_CLIENTS + 1];
     int Age;
     // info da conta
-    char *Status;
+    char Status[STATUS_MAX_LEN + 1];
     unsigned short AccountType; // 1 para corrente, 2 para poupanca
     long AccountNumber;
     double Balance;
@@ -100,9 +97,9 @@ void open_account(void)
         {
             printf("Digite seu CPF(com pontos e hifen): ");
             scanf(" %16s", cpf);
-
             // validacao do formato do cpf(so compara se o tamanho = 14)
             if (is_cpf_format_valid(strlen(cpf)))
+            {
                 // se for valido, checar se ja esta cadastrado.
                 if (does_client_already_exist(cpf))
                 {
@@ -111,10 +108,11 @@ void open_account(void)
                 }
                 else
                 {
-                    client_registration(name, age, cpf);//cadastrar cliente com dados ja pegos
-                    account_registration();//imediatamente apos, abrir conta
-                    break;
+                    client_registration(name, age, cpf); // cadastrar cliente com dados ja pegos
+                    account_registration();              // imediatamente apos, abrir conta
+                    return;                              // voltar ao menu principal
                 }
+            }
 
             // se invalido, continue, aka: perguntar novamente
             else
@@ -128,28 +126,32 @@ void open_account(void)
 // funcao para inserir usuario novo, parte do processo de abertura de conta
 void client_registration(char *name, int age, char *cpf)
 {
-    clients[num_of_clients].Name = name;
+    strcpy(clients[num_of_clients].Name, name);
     clients[num_of_clients].Age = age;
-    clients[num_of_clients].CPF = cpf;
-    printf("Cliente cadastrado com sucesso.");
+    strcpy(clients[num_of_clients].CPF, cpf);
+    printf("Cliente cadastrado com sucesso.\n");
 }
 
 void account_registration()
 {
-    while (true)
+    bool continue_acc_regis_validation = true;
+    while (continue_acc_regis_validation)
     {
         char option = '\0';
-        printf("Deseja abrir qual tipo de conta (digite o numero equivalente)?");
-        printf("Corrente (1)");
-        printf("Poupanca (2)");
+        printf("Deseja abrir qual tipo de conta (digite o numero equivalente)?\n");
+        printf("Corrente (1)\n");
+        printf("Poupanca (2)\n");
 
+        scanf(" %c", &option);
         switch (option)
         {
         case '1':
             clients[num_of_clients].AccountType = 1; // corrrente
+            continue_acc_regis_validation = false;
             break;
         case '2':
             clients[num_of_clients].AccountType = 2; // poupança
+            continue_acc_regis_validation = false;
             break;
         default:
             printf("Tipo de conta invalida.");
@@ -158,8 +160,9 @@ void account_registration()
     }
     clients[num_of_clients].AccountNumber = num_of_clients;
     clients[num_of_clients].Balance = 0.0;
-    clients[num_of_clients].Status = "ABERTA";
-    printf("Conta cadastrada com sucesso.");
+    strcpy(clients[num_of_clients].Status, "ABERTA");
+    printf("Conta cadastrada com sucesso.\n");
+    num_of_clients++; // registrar mais um cadastro de usuario
 }
 
 void list_clients(void)
@@ -173,8 +176,10 @@ void list_clients(void)
 
     for (int i = 0; i < num_of_clients; i++)
     {
-        printf("Informacoes do cliente %d.\n", i);
+        printf("Informacoes do cliente %d.\n", i + 1);
         printf("Nome: %s.\n", clients[i].Name);
+        printf("Idade: %d.\n", clients[i].Age);
+        printf("CPF: %s.\n", clients[i].CPF);
         printf("Numero da Conta %ld.\n", clients[i].AccountNumber);
 
         if (clients[i].AccountType == 1)
@@ -240,16 +245,16 @@ void account_operation(int operation_type)
     printf("Este numero de conta nao existe.");
 }
 
-int is_cpf_format_valid(int strlen)
+bool is_cpf_format_valid(int strlen)
 {
     printf("TAMANHO: %d\n", strlen);
-    return strlen != 14 ? false : true;
+    return strlen == 14 ? true : false;
 }
 // funcao que verifica se usuario ja exist
 int does_client_already_exist(char *cpf)
 {
     // percorre usuarios cadastrados e compara cpfs com cpf do parametro
-    for (int i = 0; i < MAX_CLIENTS; i++)
+    for (int i = 0; i < num_of_clients; i++)
     {
         if (strcmp(cpf, clients[i].CPF) == 0)
             return true;
@@ -272,7 +277,7 @@ void close_account(void)
         {
             if (clients[i].Balance == 0.0)
             {
-                clients[i].Status = "FECHADA";
+                strcpy(clients[num_of_clients].Status, "FECHADA");
             }
             else
             {
