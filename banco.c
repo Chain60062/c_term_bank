@@ -1,6 +1,7 @@
 #include "banco.h"
 #define NAME_MAX_LEN 100  // tamanho max do nome
 #define MAX_CLIENTS 100   // max de clintes da aplicacao
+#define MAX_LOANS 200     // max de emprestimos da aplicacao, 2 por cliente
 #define STATUS_MAX_LEN 20 // tamanho maximo do status
 #define CPF_LEN 14        // tamanho do CPF
 
@@ -17,24 +18,23 @@ typedef struct
     int AccountNumber;
     double Balance;
 } Clients;
+typedef struct
+{
+    int AccountNumber;
+    double Value;
+} Loan;
 
 Clients clients[MAX_CLIENTS]; // array de struct de usuarios
-int num_of_clients;           // numero de usuarios atualmente no programa
+Loan loans[MAX_LOANS];        // array de struct de emprestimos
+int num_of_clients = 0;       // numero de usuarios atualmente no programa
+int num_of_loans = 0;         // numero de emprestimos
 
-int main(void)
+int main()
 {
-    strcpy(clients[num_of_clients].Name, "Renato Oliveira");
-    clients[num_of_clients].Age = 35;
-    strcpy(clients[num_of_clients].CPF, "111.222.222-23");
-    strcpy(clients[num_of_clients].Status, "ABERTA");
-    clients[num_of_clients].AccountNumber = num_of_clients;
-    clients[num_of_clients].AccountType = 1;
-    clients[num_of_clients].Balance = 0.0;
-    num_of_clients++; // registrar mais um cadastro de usuario
     main_menu();
 }
 // menu principal
-void main_menu(void)
+void main_menu()
 {
     bool continue_program = true;
     while (continue_program)
@@ -47,7 +47,7 @@ void main_menu(void)
         printf("Realizar depósito (3)\n");
         printf("Realizar saque (4)\n");
         printf("Fechar Conta (5)\n");
-        printf("Realizar Emprestimo\n");
+        printf("Realizar Emprestimo (6)\n");
         printf("Sair (0)\n");
 
         scanf(" %c", &option);
@@ -81,7 +81,7 @@ void main_menu(void)
     }
 }
 // funcao para abrir contas
-void open_account(void)
+void open_account()
 {
     char name[NAME_MAX_LEN + 1];
     char cpf[CPF_LEN + 2]; // tamanho 16 pois: null char + caractere extra para validacao de input falhar caso maior que 14 = 16
@@ -94,7 +94,7 @@ void open_account(void)
         fgetc(stdin); // consome caracatere restante, fflush nao funcionou
         fgets(name, NAME_MAX_LEN, stdin);
         printf("Digite sua idade: ");
-        scanf("%d", &age);
+        scanf("%i", &age);
         if (age < 18)
         {
             printf("Cliente precisa ser maior de idade.\n");
@@ -173,7 +173,7 @@ void account_registration()
     num_of_clients++; // registrar mais um cadastro de usuario
 }
 
-void list_clients(void)
+void list_clients()
 {
     printf("----Listando Clientes----\n");
     if (num_of_clients == 0)
@@ -184,11 +184,11 @@ void list_clients(void)
 
     for (int i = 0; i < num_of_clients; i++)
     {
-        printf("Informacoes do cliente %d:\n", i + 1);
+        printf("Informacoes do cliente %i:\n", i + 1);
         printf("Nome: %s\n", clients[i].Name);
-        printf("Idade: %d\n", clients[i].Age);
+        printf("Idade: %i\n", clients[i].Age);
         printf("CPF: %s\n", clients[i].CPF);
-        printf("Numero da Conta %d\n", clients[i].AccountNumber);
+        printf("Numero da Conta %i\n", clients[i].AccountNumber);
 
         if (clients[i].AccountType == 1)
             printf("Tipo de Conta: Corrente.\n");
@@ -202,13 +202,15 @@ void list_clients(void)
     }
 }
 
-void withdraw(void)
+void withdraw()
 {
+    printf("----Saque----\n");
     account_operation(1); // tipo 1 representa saque
 }
 
-void deposit(void)
+void deposit()
 {
+    printf("----Deposito----\n");
     account_operation(2); // tipo 2 representa deposito
 }
 // estrutura de funcao comum entre saque e deposito
@@ -218,7 +220,7 @@ void account_operation(int operation_type)
     double value = 0.0;
 
     printf("Digite o numero da conta: ");
-    scanf("%d", &account_number);
+    scanf("%i", &account_number);
     for (int i = 0; i < num_of_clients; i++)
     {
         if (account_number == clients[i].AccountNumber)
@@ -249,8 +251,8 @@ void account_operation(int operation_type)
                 else
                 {
                     clients[i].Balance += value;
-                    printf("Deposito realizado com sucesso!\n");
-                    printf("Seu saldo agora e: %.2f", clients[i].Balance);
+                    printf("Deposito realizado com sucesso!\n\n");
+                    printf("Seu saldo agora e: %.2f\n", clients[i].Balance);
                 }
             }
             return; // sai da funcao em caso de sucesso
@@ -276,16 +278,62 @@ int does_client_already_exist(char *cpf)
     // caso nenhum strcmp retorne verdadeiro, cpf nao encontrado
     return false;
 }
-void loan(void)
+void loan()
 {
+
+    double loan_value = 0.0;
+    int account_number = 0;
+
+    printf("----Emprestimo----\n");
+    printf("Digite o numero da conta: ");
+    scanf("%i", &account_number);
+
+    for (int i = 0; i < num_of_clients; i++)
+    {
+        if (clients[i].AccountNumber == account_number)
+        {
+            while (true)
+            {
+                printf("Digite o valor do emprestimo: \n");
+                scanf("%lf", &loan_value);
+
+                if (clients[i].Balance == loan_value * 2)
+                {
+                    printf("Valor maior que o seu limite");
+                    continue;
+                }
+
+                double balance_sum = 0.0;
+                for (int i = 0; i < num_of_clients; i++)
+                {
+                    balance_sum += clients[i].Balance;
+                }
+                if (loan_value > balance_sum * 0.2)
+                {
+                    printf("Valor maior que o crédito disponível nesta agência.");
+                    return;
+                }
+
+                clients[i].Balance += loan_value;
+                loans[i].AccountNumber = clients[i].AccountNumber;
+                loans[i].Value = loan_value;
+                num_of_loans++;
+                printf("Emprestimo efetuado com sucesso");
+                printf("Seu saldo agora e: %.2f", clients[i].Balance);
+                return;
+            }
+        }
+    }
+    printf("Este numero de conta nao existe.");
 }
 
-void close_account(void)
+void close_account()
 {
+    printf("----Fechamento de Conta----\n");
     int account_number = 0;
 
     printf("Digite o numero da conta: ");
-    scanf(" %d", &account_number);
+    scanf("%i", &account_number);
 
     for (int i = 0; i < num_of_clients; i++)
     {
@@ -295,11 +343,12 @@ void close_account(void)
             {
                 strcpy(clients[i].Status, "FECHADA");
                 printf("Conta fechada com sucesso.\n");
+                printf("Lamentamos sua decisao.\n");
                 return;
             }
             else
             {
-                printf("E necessario esvaziar a conta antes de fecha-la");
+                printf("E necessario esvaziar a conta antes de fecha-la.\n");
                 return;
             }
         }
