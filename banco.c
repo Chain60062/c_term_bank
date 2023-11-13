@@ -23,6 +23,14 @@ int num_of_clients;           // numero de usuarios atualmente no programa
 
 int main(void)
 {
+    strcpy(clients[num_of_clients].Name, "Renato Oliveira");
+    clients[num_of_clients].Age = 35;
+    strcpy(clients[num_of_clients].CPF, "111.222.222-23");
+    strcpy(clients[num_of_clients].Status, "ABERTA");
+    clients[num_of_clients].AccountNumber = num_of_clients;
+    clients[num_of_clients].AccountType = 1;
+    clients[num_of_clients].Balance = 0.0;
+    num_of_clients++; // registrar mais um cadastro de usuario
     main_menu();
 }
 // menu principal
@@ -209,7 +217,7 @@ void account_operation(int operation_type)
     int account_number = 0;
     double value = 0.0;
 
-    printf("Digite o número da conta");
+    printf("Digite o numero da conta: ");
     scanf("%d", &account_number);
     for (int i = 0; i < num_of_clients; i++)
     {
@@ -218,33 +226,40 @@ void account_operation(int operation_type)
             // se tipo de operacao for saque
             if (operation_type == 1)
             {
+                printf("Digite o valor a ser sacado: ");
+                scanf("%lf", &value);
                 if (value > clients[i].Balance || value <= 0)
-                    printf("Valor de saque invalido.");
+                    printf("Valor de saque invalido.\n");
                 else
                 {
                     clients[i].Balance -= value;
-                    printf("Saque realizado com sucesso!");
+                    printf("Saque realizado com sucesso!\n");
+                    printf("Seu saldo agora e: %.2f", clients[i].Balance);
                 }
             }
             // caso contrario deposito
             else
             {
+                printf("Digite o valor a ser depositado: ");
+                scanf("%lf", &value);
                 if (value <= 0)
-                    printf("Valor de deposito invalido.");
+                {
+                    printf("Valor de deposito invalido.\n");
+                }
                 else
                 {
                     clients[i].Balance += value;
-                    printf("Deposito realizado com sucesso!");
+                    printf("Deposito realizado com sucesso!\n");
+                    printf("Seu saldo agora e: %.2f", clients[i].Balance);
                 }
             }
-            printf("Seu saldo agora e: %.2f", clients[i].Balance);
             return; // sai da funcao em caso de sucesso
         }
     }
     // caso contrario conta nao existe
     printf("Este numero de conta nao existe.");
 }
-//valida tamanho do cpf
+// valida tamanho do cpf
 bool is_cpf_format_valid(int strlen)
 {
     return strlen == 14 ? true : false;
@@ -273,10 +288,9 @@ void close_account(void)
     scanf(" %d", &account_number);
 
     for (int i = 0; i < num_of_clients; i++)
-    {       
+    {
         if (clients[i].AccountNumber == account_number)
         {
-            printf("contas batem\n");
             if (clients[i].Balance == 0.0)
             {
                 strcpy(clients[i].Status, "FECHADA");
