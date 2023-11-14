@@ -172,6 +172,23 @@ void account_registration()
     printf("Conta cadastrada com sucesso.\n");
     num_of_clients++; // registrar mais um cadastro de usuario
 }
+// valida tamanho do cpf
+bool is_cpf_format_valid(int strlen)
+{
+    return strlen == 14 ? true : false;
+}
+// funcao que verifica se usuario ja exist
+int does_client_already_exist(char *cpf)
+{
+    // percorre usuarios cadastrados e compara cpfs com cpf do parametro
+    for (int i = 0; i < num_of_clients; i++)
+    {
+        if (strcmp(cpf, clients[i].CPF) == 0)
+            return true;
+    }
+    // caso nenhum strcmp retorne verdadeiro, cpf nao encontrado
+    return false;
+}
 
 void list_clients()
 {
@@ -199,6 +216,10 @@ void list_clients()
 
         printf("Status da conta: %s.\n", clients[i].Status);
         printf("Saldo da conta: %.2f.\n", clients[i].Balance);
+
+        printf("\nPressione ENTER para voltar ao menu principal\n");
+        getchar();//consome char a mais
+        while (getchar() != '\n');//espera enter
     }
 }
 
@@ -261,23 +282,37 @@ void account_operation(int operation_type)
     // caso contrario conta nao existe
     printf("Este numero de conta nao existe.");
 }
-// valida tamanho do cpf
-bool is_cpf_format_valid(int strlen)
+
+void close_account()
 {
-    return strlen == 14 ? true : false;
-}
-// funcao que verifica se usuario ja exist
-int does_client_already_exist(char *cpf)
-{
-    // percorre usuarios cadastrados e compara cpfs com cpf do parametro
+    printf("----Fechamento de Conta----\n");
+    int account_number = 0;
+
+    printf("Digite o numero da conta: ");
+    scanf("%i", &account_number);
+
     for (int i = 0; i < num_of_clients; i++)
     {
-        if (strcmp(cpf, clients[i].CPF) == 0)
-            return true;
+        if (clients[i].AccountNumber == account_number)
+        {
+            if (clients[i].Balance == 0.0)
+            {
+                strcpy(clients[i].Status, "FECHADA");
+                printf("Conta fechada com sucesso.\n");
+                printf("Lamentamos sua decisao.\n");
+                return;
+            }
+            else
+            {
+                printf("E necessario esvaziar a conta antes de fecha-la.\n");
+                return;
+            }
+        }
     }
-    // caso nenhum strcmp retorne verdadeiro, cpf nao encontrado
-    return false;
+    // caso contrario conta nao existe
+    printf("Este numero de conta nao existe.");
 }
+
 void loan()
 {
 
@@ -327,32 +362,3 @@ void loan()
     printf("Este numero de conta nao existe.");
 }
 
-void close_account()
-{
-    printf("----Fechamento de Conta----\n");
-    int account_number = 0;
-
-    printf("Digite o numero da conta: ");
-    scanf("%i", &account_number);
-
-    for (int i = 0; i < num_of_clients; i++)
-    {
-        if (clients[i].AccountNumber == account_number)
-        {
-            if (clients[i].Balance == 0.0)
-            {
-                strcpy(clients[i].Status, "FECHADA");
-                printf("Conta fechada com sucesso.\n");
-                printf("Lamentamos sua decisao.\n");
-                return;
-            }
-            else
-            {
-                printf("E necessario esvaziar a conta antes de fecha-la.\n");
-                return;
-            }
-        }
-    }
-    // caso contrario conta nao existe
-    printf("Este numero de conta nao existe.");
-}
