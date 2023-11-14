@@ -216,11 +216,10 @@ void list_clients()
 
         printf("Status da conta: %s.\n", clients[i].Status);
         printf("Saldo da conta: %.2f.\n", clients[i].Balance);
-
-        printf("\nPressione ENTER para voltar ao menu principal\n");
-        getchar();//consome char a mais
-        while (getchar() != '\n');//espera enter
     }
+    printf("\nPressione ENTER para voltar ao menu principal\n");
+    getchar(); // consome char a mais
+    while (getchar() != '\n'); // espera enter
 }
 
 void withdraw()
@@ -361,4 +360,3 @@ void loan()
     }
     printf("Este numero de conta nao existe.");
 }
-
