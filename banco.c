@@ -98,6 +98,7 @@ void open_account()
         if (age < 18)
         {
             printf("Cliente precisa ser maior de idade.\n");
+            press_enter();
             return; // retorna para o menu
         }
 
@@ -112,13 +113,15 @@ void open_account()
                 if (does_client_already_exist(cpf))
                 {
                     printf("Já existe um usuário cadastrado com este CPF.\n");
+                    press_enter();
                     return;
                 }
                 else
                 {
                     client_registration(name, age, cpf); // cadastrar cliente com dados ja pegos
                     account_registration();              // imediatamente apos, abrir conta
-                    return;                              // voltar ao menu principal
+                    press_enter();
+                    return; // voltar ao menu principal
                 }
             }
 
@@ -137,7 +140,7 @@ void client_registration(char *name, int age, char *cpf)
     strcpy(clients[num_of_clients].Name, name);
     clients[num_of_clients].Age = age;
     strcpy(clients[num_of_clients].CPF, cpf);
-    printf("Cliente cadastrado com sucesso.\n");
+    printf("\nCliente cadastrado com sucesso.\n");
 }
 
 void account_registration()
@@ -169,7 +172,7 @@ void account_registration()
     clients[num_of_clients].AccountNumber = num_of_clients;
     clients[num_of_clients].Balance = 0.0;
     strcpy(clients[num_of_clients].Status, "ABERTA");
-    printf("Conta cadastrada com sucesso.\n");
+    printf("\nConta cadastrada com sucesso.\n");
     num_of_clients++; // registrar mais um cadastro de usuario
 }
 // valida tamanho do cpf
@@ -217,9 +220,7 @@ void list_clients()
         printf("Status da conta: %s.\n", clients[i].Status);
         printf("Saldo da conta: %.2f.\n", clients[i].Balance);
     }
-    printf("\nPressione ENTER para voltar ao menu principal\n");
-    getchar(); // consome char a mais
-    while (getchar() != '\n'); // espera enter
+    press_enter();
 }
 
 void withdraw()
@@ -255,8 +256,9 @@ void account_operation(int operation_type)
                 else
                 {
                     clients[i].Balance -= value;
-                    printf("Saque realizado com sucesso!\n");
-                    printf("Seu saldo agora e: %.2f", clients[i].Balance);
+                    printf("\nSaque realizado com sucesso!\n");
+                    clients[i].Name[strcspn(clients[i].Name, "\n")] = '\0'; // remove \n da string nome
+                    printf("O saldo de %s agora e: R$ %.2f", clients[i].Name, clients[i].Balance);
                 }
             }
             // caso contrario deposito
@@ -271,15 +273,18 @@ void account_operation(int operation_type)
                 else
                 {
                     clients[i].Balance += value;
-                    printf("Deposito realizado com sucesso!\n\n");
-                    printf("Seu saldo agora e: %.2f\n", clients[i].Balance);
+                    printf("\nDeposito realizado com sucesso!\n");
+                    clients[i].Name[strcspn(clients[i].Name, "\n")] = '\0';
+                    printf("O saldo de %s agora e: R$ %.2f", clients[i].Name, clients[i].Balance);
                 }
             }
+            press_enter();
             return; // sai da funcao em caso de sucesso
         }
     }
     // caso contrario conta nao existe
     printf("Este numero de conta nao existe.");
+    press_enter();
 }
 
 void close_account()
@@ -297,19 +302,22 @@ void close_account()
             if (clients[i].Balance == 0.0)
             {
                 strcpy(clients[i].Status, "FECHADA");
-                printf("Conta fechada com sucesso.\n");
+                printf("\nConta fechada com sucesso.\n");
                 printf("Lamentamos sua decisao.\n");
+                press_enter();
                 return;
             }
             else
             {
-                printf("E necessario esvaziar a conta antes de fecha-la.\n");
+                printf("\nE necessario esvaziar a conta antes de fecha-la.\n");
+                press_enter();
                 return;
             }
         }
     }
     // caso contrario conta nao existe
     printf("Este numero de conta nao existe.");
+    press_enter();
 }
 
 void loan()
@@ -345,6 +353,7 @@ void loan()
                 if (loan_value > balance_sum * 0.2)
                 {
                     printf("Valor maior que o crédito disponível nesta agência.");
+                    press_enter();
                     return;
                 }
 
@@ -352,11 +361,21 @@ void loan()
                 loans[i].AccountNumber = clients[i].AccountNumber;
                 loans[i].Value = loan_value;
                 num_of_loans++;
-                printf("Emprestimo efetuado com sucesso");
-                printf("Seu saldo agora e: %.2f", clients[i].Balance);
+                printf("\nEmprestimo efetuado com sucesso\n");
+                clients[i].Name[strcspn(clients[i].Name, "\n")] = '\0';
+                printf("O saldo de %s agora e: R$ %.2f", clients[i].Name, clients[i].Balance);
+                press_enter();
                 return;
             }
         }
     }
     printf("Este numero de conta nao existe.");
+    press_enter();
+}
+
+void press_enter()
+{
+    printf("\nPressione ENTER para voltar ao menu principal\n");
+    getchar(); // consome char a mais
+    while (getchar() != '\n'); // espera enter
 }

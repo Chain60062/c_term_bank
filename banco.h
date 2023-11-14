@@ -17,3 +17,4 @@ void close_account();
 void main_menu();
 void client_registration();
 void account_registration();
+void press_enter();
